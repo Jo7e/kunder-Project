@@ -1,0 +1,90 @@
+/* Empty. Add your own CSS if you like */
+* {
+    box-sizing: border-box;
+}
+
+#title_text{
+    color: black;
+    text-align: center;
+    font-family:'Montserrat', sans-serif;
+    font-size:28px;
+}
+
+.logo{
+    width:130px;
+}
+
+.col-9{
+    width:100%;
+}
+
+.col-3{
+    width:100px;
+}
+
+.btn1,
+.btn2{
+    width:50%;
+}
+
+#openImdb{
+    width: 20'0px;
+}
+
+#spacing{
+    height: 50px;
+}
+
+.spacing_btwn{
+    padding-bottom: 7px;
+}
+
+#Addbtn{
+    color:red;
+}
+
+#Favsbtn1{
+    color:gray;
+}
+#Favsbtn2{
+    color:gold;
+}
+
+#busqueda_header{
+    height:45px;
+    border-radius:10px;
+}
+
+#logo_image{
+    height:45px;
+}
+
+#query{
+    color:black;
+}
+
+#search_input{
+    height:150px;
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto
+}
+
+#footer_background{
+    background-color:palevioletred;
+}
+
+h2{
+    padding-top:100px;
+}
+
+
+
+#footer_query,
+#footer_playlist,
+#footer_favs{
+    color:black;
+}

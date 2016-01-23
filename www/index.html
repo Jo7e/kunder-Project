@@ -1,0 +1,408 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>IMDb Search</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+      <link href="//code.ionicframework.com/nightly/css/ionic.css" rel="stylesheet">
+      
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+       
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+       
+    <!-- your app's js -->
+    <script src="js/app.js"></script>
+
+
+
+  </head>
+    <body ng-app="starter">
+        <ion-pane>
+            <!-- Header -->
+            <ion-nav-bar class="bar-assertive">
+                <ion-nav-back-button>
+                </ion-nav-back-button>
+            </ion-nav-bar>
+            <ion-nav-view></ion-nav-view>
+            <script id="templates/tabs.html" type="text/ng-template">
+                <ion-tabs class="tabs-icon-top tabs-assertive">
+
+                    <ion-tab title="Home" icon="ion-home" href="#/tab/home">
+                        <ion-nav-view name="home-tab"></ion-nav-view>
+                    </ion-tab>
+
+                    <ion-tab title="Playlist" icon="ion-plus-circled" href="#/tab/playlist" >
+                        <ion-nav-view name="playlist-tab"></ion-nav-view>
+                    </ion-tab>
+
+                    <ion-tab title="Favorites" icon="ion-android-star" href="#/tab/favs">
+                        <ion-nav-view name="favs-tab"></ion-nav-view>
+                    </ion-tab>
+
+                </ion-tabs>
+            </script>
+
+            <!-- HOME TAB -->
+            <script id="templates/home.html" type="text/ng-template">
+                <ion-view ng-controller="Playlists" view-title="IMDb Search">
+                    <ion-content class="padding">
+                        <!-- Buscador -->
+                        <div id="search_input">
+                            <!-- IMDb logo -->
+                            <div class="logo">
+                                <a href="#"> <img id="logo_image" src="img/imdblogo.png"> </a>
+                            </div>
+                            <div class="row">
+                                <!-- Search by Name -->
+                                <div class="col-9">
+                                    <label id="busqueda_header" class="item item-input"> <!-- Input -->
+                                        <i class="icon ion-ios-search placeholder-icon"></i>
+                                        <input id="query" type="search" 
+                                               placeholder="Search in IMDb" ng-model="query.Name">
+                                    </label>
+                                </div>
+                                <div class="col-3">
+                                    <a class="button button-medium" ng-click="searchName()" ng-href="#/tab/results"> <!-- Summit -->
+                                        Submit
+                                    </a>
+                                    <!-- TODO Summit query to IMDb -->
+                                </div>
+                            </div>
+                        </div>
+                    </ion-content>
+                </ion-view>
+            </script>
+
+            <!-- Home+Query TAB -->
+            <script id="templates/results.html" type="text/ng-template">
+                <ion-view ng-controller="Playlists" view-title="Results">
+                    <ion-content class="padding">
+                        <div id="main-info">
+                            <!---->
+                            <div class="list card" ng-repeat="movie in results">
+                                <div class="item item-avatar">
+                                    <img src="img/imdblogo.png">
+                                    <h2>{{ movie.Title }}</h2>
+                                    <p>Year {{ movie.Year }}</p>
+                                </div>
+                                <div class="item item-body">
+                                    <a ng-href="#/tab/movie" ng-click="gotoMovie(movie.imdbID)">
+                                        <img class="full-image" src="{{ movie.Poster }}">
+                                    </a>
+                                    <p>
+                                        <a class="subdued">IMDb ID: {{movie.imdbID}}</a>
+                                        <a class="subdued">Type: {{movie.Type}}</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </ion-content>
+                </ion-view>
+            </script>
+
+            <!-- Home+Query+Movie TAB -->
+            <script id="templates/movie.html" type="text/ng-template">
+                <ion-view ng-controller="Playlists" view-title="">
+                    <ion-content class="padding">
+                        <div id="main-info">
+                            <div ng-repeat="mov in Movies">
+                                <div class="item item-text-wrap">
+                                    <div id="poster">
+                                        <img class="full-image" src="{{ mov.data.Poster }}" onError="this.src='img/404.jpg'" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-10">
+                                            <a class="button button-icon ion-android-open" ng-href="http://www.imdb.com/title/{{mov.data.imdbID}}"></a>
+                                        </div>
+                                        <div class="col col-50">
+                                            <h2>{{ mov.data.Title }}</h2> 
+                                            ({{ mov.data.Year }})
+                                        </div>
+                                        <div class="col col-20">
+                                            <a ng-hide="showLists" id="Addbtn" class="button button-icon icon ion-plus-circled" ng-click="updateLists(); showLists=true"></a>
+                                            <a ng-show="showLists" id="Addbtn" class="button button-icon icon ion-plus-circled" ng-click="updateLists(); showLists=false"></a>
+                                        </div>
+                                        <div class="col col-20">
+                                            <a ng-hide="showFav" id="Favsbtn1" class="button button-icon icon ion-android-star-outline" ng-click="addToFavs(); showFav=true"></a>
+                                            <a ng-show="showFav" id="Favsbtn2" class="button button-icon icon ion-android-star"></a>
+                                            <!--<a id="Favsbtn" class="button button-icon icon ion-star"></a>-->
+                                        </div>
+                                        </div>
+                                    <div ng-show="showLists">
+                                        <h2>Playlists:</h2>
+                                        <ul>
+                                            <li ng-repeat="x in ListList">
+                                                <a class="item item-text-wrap" ng-click="addMovie(x.ListID)">
+                                                    <h2>{{ x.Name }}</h2>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <label class="item item-input">
+                                            <input value="1" type="text" placeholder="Create a new Playlist" ng-model="list.nombre">
+                                        </label>
+                                        <button class="btn" ng-click="addPlaylist()">Add Movie to new List</button>
+                                    </div>
+                                    <div class="spacing_btwn">{{mov.data.Actors}}</p></div>
+                                    <div class="spacing_btwn"><p>{{mov.data.Plot}}</p></div>
+                                    <div class="spacing_btwn"><p>{{mov.data.Awards}}</p></div>
+                                    <div class="row">
+                                        <div class="col col-20">
+                                            IMDb:
+                                        </div>
+                                        <div class="col col-20">
+                                            {{mov.data.imdbRating}}
+                                        </div>
+                                        <div class="col col-20">
+                                            
+                                        </div>
+                                        <div class="col col-20">
+                                            RT:
+                                        </div>
+                                        <div class="col col-20">
+                                            {{mov.data.tomatoRating}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="spacing">
+                                    <!--Spacing-->
+                                </div>
+                            </div>
+                        </div>
+                    </ion-content>
+                </ion-view>
+            </script>
+
+            <!-- PLAYLIST TAB -->
+            <script id="templates/playlist.html" type="text/ng-template">
+                <ion-view view-title="Playlists">
+                    <ion-content class="padding">
+                        <div ng-controller="Playlists" class="list">
+                            <h2>Playlists:</h2>
+                            <ul>
+                                <li ng-repeat="x in ListList">
+                                    <a class="item item-text-wrap" ng-click="updateListNum(x.ListID); updateLists()" href="#/tab/list">
+                                        <h2>{{ x.Name }}</h2>
+                                    </a>
+                                </li>
+                            </ul>
+                            <!---->
+                            <div>
+                                <label class="item item-input">
+                                    <input value="1" type="text" placeholder="New Playlist" ng-model="list.nombre">
+                                </label>
+                            </div>
+                            <div class="row btn-group btn-group-justified">
+                                <button class="btn1" ng-click="addPlaylist()">Add a new Playlist</button>
+                                <button class="btn2" ng-click="updateLists()">Update Lists</button>
+                            </div>
+                        </div>
+                    </ion-content>
+                </ion-view>
+            </script>
+            <!-- PLAYLIST+List TAB -->
+            <script id="templates/list.html" type="text/ng-template">
+                <ion-view view-title="Movie">
+                    <ion-content class="padding">
+                        <div ng-controller="Playlists" class="list">
+                            <button ng-hide="showMovies"class="btn2" ng-click="updateMovies(); showMovies=true">Update Lists</button>
+                            <ul>
+                                <li ng-repeat="x in MovMov">
+                                    <a class="item item-thumbnail-left" ng-href="#/tab/playlist_movie" ng-click="gotoMovie(x.imdbID)">
+                                        <img src="{{x.Poster}}"/>
+                                        <h2>{{ x.Title }}</h2>
+                                        <p>{{x.Year}}</p>
+                                        <p>{{x.Actors}}</p>
+                                        <p>IMDb Rating: {{x.imdbRating}}</p>
+                                    </a>
+                                </li>
+                            </ul>
+                            <!---->
+                        </div>
+                    </ion-content>
+                </ion-view>
+            </script>
+            <!---->
+            <!-- PLAYLIST+List+Movie TAB -->
+            
+            <script id="templates/playlist_movie.html" type="text/ng-template">
+                <ion-view ng-controller="Playlists" view-title="">
+                    <ion-content class="padding">
+                        <div id="main-info">
+                            <div ng-repeat="mov in Movies">
+                                <div class="item item-text-wrap">
+                                    <div id="poster">
+                                        <img class="full-image" src="{{ mov.data.Poster }}" onError="this.src='img/404.jpg'" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-10">
+                                            <a class="button button-icon ion-android-open" ng-href="http://www.imdb.com/title/{{mov.data.imdbID}}"></a>
+                                        </div>
+                                        <div class="col col-50">
+                                            <h2>{{ mov.data.Title }}</h2>
+                                            ({{ mov.data.Year }})
+                                        </div>
+                                        <div class="col col-20">
+                                            <a ng-hide="showLists" id="Addbtn" class="button button-icon icon ion-plus-circled" ng-click="updateLists(); showLists=true"></a>
+                                            <a ng-show="showLists" id="Addbtn" class="button button-icon icon ion-plus-circled" ng-click="updateLists(); showLists=false"></a>
+                                        </div>
+                                        <div class="col col-20">
+                                            <a ng-hide="showFav" id="Favsbtn1" class="button button-icon icon ion-android-star-outline" ng-click="addToFavs(); showFav=true"></a>
+                                            <a ng-show="showFav" id="Favsbtn2" class="button button-icon icon ion-android-star"></a>
+                                            <!--<a id="Favsbtn" class="button button-icon icon ion-star"></a>-->
+                                        </div>
+                                    </div>
+                                    <div ng-show="showLists">
+                                        <h2>Playlists:</h2>
+                                        <ul>
+                                            <li ng-repeat="x in ListList">
+                                                <a class="item item-text-wrap" ng-click="addMovie(x.ListID)">
+                                                    <h2>{{ x.Name }}</h2>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <label class="item item-input">
+                                            <input value="1" type="text" placeholder="Create a new Playlist" ng-model="list.nombre">
+                                        </label>
+                                        <button class="btn" ng-click="addPlaylist()">Add Movie to new List</button>
+                                    </div>
+                                    <div class="spacing_btwn">{{mov.data.Actors}}</p></div>
+                                    <div class="spacing_btwn"><p>{{mov.data.Plot}}</p></div>
+                                    <div class="spacing_btwn"><p>{{mov.data.Awards}}</p></div>
+                                    <div class="row">
+                                        <div class="col col-20">
+                                            IMDb:
+                                        </div>
+                                        <div class="col col-20">
+                                            {{mov.data.imdbRating}}
+                                        </div>
+                                        <div class="col col-20">
+
+                                        </div>
+                                        <div class="col col-20">
+                                            RT:
+                                        </div>
+                                        <div class="col col-20">
+                                            {{mov.data.tomatoRating}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="spacing">
+                                    <!--Spacing-->
+                                </div>
+                            </div>
+                        </div>
+                    </ion-content>
+                </ion-view>
+            </script>
+            <!-- FAVORITES TAB -->
+            <script id="templates/favs.html" type="text/ng-template">
+                <ion-view view-title="Favorites">
+                    <ion-content class="padding">
+                        <h2>Favorites:</h2>
+                        <div ng-controller="Playlists" class="list">
+                            <button ng-hide="showMovies" class="btn2" ng-click="updateFavs(); showMovies=true">Update Favorites</button>
+                            <ul>
+                                <li ng-repeat="x in FavList">
+                                    <a class="item item-thumbnail-left" ng-href="#/tab/favs_movie" ng-click="gotoMovie(x.imdbID)">
+                                        <img src="{{x.Poster}}" />
+                                        <h2>{{ x.Title }}</h2>
+                                        <p>{{x.Year}}</p>
+                                        <p>{{x.Actors}}</p>
+                                        <p>IMDb Rating: {{x.imdbRating}}</p>
+                                    </a>
+                                </li>
+                            </ul>
+                            <!---->
+                        </div>
+                    </ion-content>
+                </ion-view>
+            </script>
+
+            <!-- FAVORITES+Movie TAB -->
+            <script id="templates/favs_movie.html" type="text/ng-template">
+                <ion-view ng-controller="Playlists" view-title="">
+                    <ion-content class="padding">
+                        <div id="main-info">
+                            <div ng-repeat="mov in Movies">
+                                <div class="item item-text-wrap">
+                                    <div id="poster">
+                                        <img class="full-image" src="{{ mov.data.Poster }}" onError="this.src='img/404.jpg'" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-10">
+                                            <a class="button button-icon ion-android-open" ng-href="http://www.imdb.com/title/{{mov.data.imdbID}}"></a>
+                                        </div>
+                                        <div class="col col-50">
+                                            <h2>{{ mov.data.Title }}</h2>
+                                            ({{ mov.data.Year }})
+                                        </div>
+                                        <div class="col col-20">
+                                            <a ng-hide="showLists" id="Addbtn" class="button button-icon icon ion-plus-circled" ng-click="updateLists(); showLists=true"></a>
+                                            <a ng-show="showLists" id="Addbtn" class="button button-icon icon ion-plus-circled" ng-click="updateLists(); showLists=false"></a>
+                                        </div>
+                                        <div class="col col-20">
+                                            <a ng-hide="showFav" id="Favsbtn1" class="button button-icon icon ion-android-star-outline" ng-click="addToFavs(); showFav=true"></a>
+                                            <a ng-show="showFav" id="Favsbtn2" class="button button-icon icon ion-android-star"></a>
+                                            <!--<a id="Favsbtn" class="button button-icon icon ion-star"></a>-->
+                                        </div>
+                                    </div>
+                                    <div ng-show="showLists">
+                                        <h2>Playlists:</h2>
+                                        <ul>
+                                            <li ng-repeat="x in ListList">
+                                                <a class="item item-text-wrap" ng-click="addMovie(x.ListID)">
+                                                    <h2>{{ x.Name }}</h2>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <label class="item item-input">
+                                            <input value="1" type="text" placeholder="Create a new Playlist" ng-model="list.nombre">
+                                        </label>
+                                        <button class="btn" ng-click="addPlaylist()">Add Movie to new List</button>
+                                    </div>
+                                    <div class="spacing_btwn">{{mov.data.Actors}}</p></div>
+                                    <div class="spacing_btwn"><p>{{mov.data.Plot}}</p></div>
+                                    <div class="spacing_btwn"><p>{{mov.data.Awards}}</p></div>
+                                    <div class="row">
+                                        <div class="col col-20">
+                                            IMDb:
+                                        </div>
+                                        <div class="col col-20">
+                                            {{mov.data.imdbRating}}
+                                        </div>
+                                        <div class="col col-20">
+
+                                        </div>
+                                        <div class="col col-20">
+                                            RT:
+                                        </div>
+                                        <div class="col col-20">
+                                            {{mov.data.tomatoRating}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="spacing">
+                                    <!--Spacing-->
+                                </div>
+                            </div>
+                        </div>
+                    </ion-content>
+                </ion-view>
+            </script>
+
+            <ion-content>
+            </ion-content>
+        </ion-pane>
+    </body>
+</html>
